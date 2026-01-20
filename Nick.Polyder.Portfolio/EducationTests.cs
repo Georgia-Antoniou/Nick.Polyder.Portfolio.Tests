@@ -103,6 +103,8 @@ namespace Nick.Polyder.Portfolio
 
                 TestContext.AddTestAttachment(fullPath);
             }
+
+            await page.CloseAsync();
         }
     }
 
