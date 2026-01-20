@@ -4,7 +4,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Nick.Polyder.Portfolio
 {
-    public class HomePage : PageTest
+    public class Education : PageTest
     {
         private IBrowser browser;
         private IPage page;
@@ -21,37 +21,61 @@ namespace Nick.Polyder.Portfolio
             await Context.Tracing.StartAsync(new() { Screenshots = true, Snapshots = true });
         }
 
+
+
+       
+
+
+
+
         [Test]
-        public async Task Verify_Url()
+
+        public async Task Verify_Education_Toggle()
         {
             await page.GotoAsync("https://nickpolyder.github.io/");
-            Assert.That(page.Url, Is.EqualTo("https://nickpolyder.github.io/"));
+            await page.GetByRole(AriaRole.Heading, new() { Name = "Education" }).ClickAsync();
+            var educContex = page.GetByText("Computer Science and Engineering TE (Technological Education) – Computer Science & Telecommunications.");
+            await Expect(educContex).ToBeVisibleAsync();
+
+            var expaArrow = page.Locator("//*[@id=\"app\"]/div[3]/div/div/div[5]/div/div[4]/div[1]");
+            await expaArrow.ClickAsync();
+            await Expect(educContex).Not.ToBeVisibleAsync();
+            await page.WaitForTimeoutAsync(3000);
+
         }
 
 
         [Test]
-
-        public async Task Verify_Name()
+        public async Task Verify_Education_Contex()
         {
             await page.GotoAsync("https://nickpolyder.github.io/");
-            var name = page.Locator("//*[@id=\"app\"]/div[3]/div/div/div[2]/h2");
-            string? actualText = await name.TextContentAsync();
-            Assert.That(actualText, Is.EqualTo("Nick Polyderopoulos"));
+            await page.GetByRole(AriaRole.Heading, new() { Name = "Education" }).ClickAsync();
+            var educContex = page.GetByText("Computer Science and Engineering TE (Technological Education) – Computer Science & Telecommunications.");
+            await Expect(educContex).ToContainTextAsync("Computer Science and Engineering", new() { IgnoreCase = true });
         }
 
         [Test]
 
-        public async Task Verify_Profession()
+        public async Task Verify_Num_Of_Bachelor()
         {
-            await page.GotoAsync("//*[@id=\"app\"]/div[3]/div/div/div[5]/div/div[1]/div[1]/svg");
-            var profession = page.Locator("//*[@id=\"app\"]/div[3]/div/div/div[3]/h5");
-            string? actualText = await profession.TextContentAsync();
-            Assert.That(actualText, Is.EqualTo("Software Engineer II @ Microsoft"));
+            await page.GotoAsync("https://nickpolyder.github.io/");
+            var bachCount = page.Locator("hr.bg-education-bachelor");
+
+            await Expect(bachCount).ToHaveCountAsync(1);
+
         }
 
-        
 
-        
+        [Test]
+
+        public async Task Verify_Num_Of_Certs()
+        {
+            await page.GotoAsync("https://nickpolyder.github.io/");
+            var bachCount = page.Locator("hr.bg-education-certificate");
+            await Expect(bachCount).ToHaveCountAsync(5);
+
+        }
+
 
         [TearDown]
         public async Task TearDown()
@@ -60,7 +84,7 @@ namespace Nick.Polyder.Portfolio
             {
 
                 await page.WaitForTimeoutAsync(4000);
-               
+
                 await page.EvaluateAsync($@"() => {{
                 const div = document.createElement('div');
                 div.innerHTML = 'URL: ' + window.location.href;
@@ -73,7 +97,7 @@ namespace Nick.Polyder.Portfolio
                 string fullPath = Path.Combine(screenshotFolder, fileName);
 
                 TestContext.WriteLine($"Failure detected at URL: {Page.Url}");
-                
+
                 await page.ScreenshotAsync(new() { Path = fullPath, FullPage = true });
                 await page.WaitForTimeoutAsync(4000);
 
@@ -83,3 +107,4 @@ namespace Nick.Polyder.Portfolio
     }
 
 }
+

@@ -4,7 +4,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Nick.Polyder.Portfolio
 {
-    public class HomePage : PageTest
+    public class WhatIOffer : PageTest
     {
         private IBrowser browser;
         private IPage page;
@@ -21,37 +21,25 @@ namespace Nick.Polyder.Portfolio
             await Context.Tracing.StartAsync(new() { Screenshots = true, Snapshots = true });
         }
 
+       
+
         [Test]
-        public async Task Verify_Url()
+
+        public async Task Verify_What_I_Offer_Toggle()
         {
             await page.GotoAsync("https://nickpolyder.github.io/");
-            Assert.That(page.Url, Is.EqualTo("https://nickpolyder.github.io/"));
+
+            await page.GetByRole(AriaRole.Heading, new() { Name = "What I Offer" }).ClickAsync();
+            var whatIOffer = page.GetByText("Innovation-Driven Leadership", new() { Exact = false });
+
+            await Expect(whatIOffer).ToBeVisibleAsync();
+
+            var expaArrow = page.Locator("//*[@id=\"app\"]/div[3]/div/div/div[5]/div/div[1]/div[1]");
+            await expaArrow.ClickAsync();
+
+            await Expect(whatIOffer).Not.ToBeVisibleAsync();
+            await page.WaitForTimeoutAsync(3000);
         }
-
-
-        [Test]
-
-        public async Task Verify_Name()
-        {
-            await page.GotoAsync("https://nickpolyder.github.io/");
-            var name = page.Locator("//*[@id=\"app\"]/div[3]/div/div/div[2]/h2");
-            string? actualText = await name.TextContentAsync();
-            Assert.That(actualText, Is.EqualTo("Nick Polyderopoulos"));
-        }
-
-        [Test]
-
-        public async Task Verify_Profession()
-        {
-            await page.GotoAsync("//*[@id=\"app\"]/div[3]/div/div/div[5]/div/div[1]/div[1]/svg");
-            var profession = page.Locator("//*[@id=\"app\"]/div[3]/div/div/div[3]/h5");
-            string? actualText = await profession.TextContentAsync();
-            Assert.That(actualText, Is.EqualTo("Software Engineer II @ Microsoft"));
-        }
-
-        
-
-        
 
         [TearDown]
         public async Task TearDown()
@@ -60,7 +48,7 @@ namespace Nick.Polyder.Portfolio
             {
 
                 await page.WaitForTimeoutAsync(4000);
-               
+
                 await page.EvaluateAsync($@"() => {{
                 const div = document.createElement('div');
                 div.innerHTML = 'URL: ' + window.location.href;
@@ -73,7 +61,7 @@ namespace Nick.Polyder.Portfolio
                 string fullPath = Path.Combine(screenshotFolder, fileName);
 
                 TestContext.WriteLine($"Failure detected at URL: {Page.Url}");
-                
+
                 await page.ScreenshotAsync(new() { Path = fullPath, FullPage = true });
                 await page.WaitForTimeoutAsync(4000);
 
