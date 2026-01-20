@@ -1,5 +1,6 @@
 ﻿using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
+using System.Text.RegularExpressions;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Nick.Polyder.Portfolio
@@ -43,15 +44,81 @@ namespace Nick.Polyder.Portfolio
 
         public async Task Verify_Profession()
         {
-            await page.GotoAsync("//*[@id=\"app\"]/div[3]/div/div/div[5]/div/div[1]/div[1]/svg");
+            await page.GotoAsync("https://nickpolyder.github.io/");
             var profession = page.Locator("//*[@id=\"app\"]/div[3]/div/div/div[3]/h5");
             string? actualText = await profession.TextContentAsync();
             Assert.That(actualText, Is.EqualTo("Software Engineer II @ Microsoft"));
         }
 
-        
+        [Test]
+        public async Task Verify_Theme_Toggle_Swaps_CSS_File()
+        {
+            await page.GotoAsync("https://nickpolyder.github.io/");
 
-        
+            var themeToggle = page.Locator("//*[@id=\"app\"]/div[3]/header/div/button[2]/span");
+
+            await themeToggle.ClickAsync();
+
+            var themeLink = page.Locator("#prism-theme");
+            await Expect(themeLink).ToHaveAttributeAsync("href", new Regex("light"));
+
+            await themeToggle.ClickAsync();
+            await Expect(themeLink).ToHaveAttributeAsync("href", new Regex("dark"));
+        }
+
+        [Test]
+
+        public async Task Verify_Hamburger_Icon_Toggles_Sidebar()
+        {
+            await page.GotoAsync("https://nickpolyder.github.io/");
+
+            await page.GetByRole(AriaRole.Button).First.ClickAsync();
+            var sidebar = page.Locator("#nav-drawer");
+            await Expect(sidebar).ToHaveClassAsync(new Regex(".+close.+"));
+            await page.GetByRole(AriaRole.Button).First.ClickAsync();
+            await Expect(sidebar).ToHaveClassAsync(new Regex(".+open.+"));
+        }
+
+        [Test]
+
+        public async Task Verify_Git_Link()
+        {
+            await page.GotoAsync("https://nickpolyder.github.io/");
+            var waitForPageTask = page.Context.WaitForPageAsync();
+            await page.Locator("//*[@id=\"nav-drawer\"]/div/footer/div/div/div[2]/div/div[1]/a").ClickAsync();
+            IPage TabPage = await waitForPageTask;
+            await TabPage.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+            string expectedUrl = "https://github.com/NickPolyder";
+            Assert.That(TabPage.Url, Is.EqualTo(expectedUrl));
+        }
+
+        [Test]
+
+        public async Task Verify_LinkedIn_Link()
+        {
+            await page.GotoAsync("https://nickpolyder.github.io/");
+            var waitForPageTask = page.Context.WaitForPageAsync();
+            await page.Locator("//*[@id=\"nav-drawer\"]/div/footer/div/div/div[2]/div/div[2]/a/span").ClickAsync();
+            IPage TabPage = await waitForPageTask;
+            await TabPage.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+            string expectedUrl = "https://www.linkedin.com/in/nick-polyderopoulos-21742397/";
+            Assert.That(TabPage.Url, Is.EqualTo(expectedUrl));
+        }
+
+        [Test]
+
+        public async Task Verify_Twitter_Link()
+        {
+            await page.GotoAsync("https://nickpolyder.github.io/");
+            var waitForPageTask = page.Context.WaitForPageAsync();
+            await page.Locator("//*[@id=\"nav-drawer\"]/div/footer/div/div/div[2]/div/div[3]/a/span").ClickAsync();
+            IPage TabPage = await waitForPageTask;
+            await TabPage.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+            string expectedUrl = "https://x.com/nickpolyder";
+            Assert.That(TabPage.Url, Is.EqualTo(expectedUrl));
+        }
+
+
 
         [TearDown]
         public async Task TearDown()
@@ -72,7 +139,7 @@ namespace Nick.Polyder.Portfolio
                 string fileName = $"{TestContext.CurrentContext.Test.Name}_Failed.png";
                 string fullPath = Path.Combine(screenshotFolder, fileName);
 
-                TestContext.WriteLine($"Failure detected at URL: {Page.Url}");
+                TestContext.WriteLine($"Failure detected at URL: {page.Url}");
                 
                 await page.ScreenshotAsync(new() { Path = fullPath, FullPage = true });
                 await page.WaitForTimeoutAsync(4000);
