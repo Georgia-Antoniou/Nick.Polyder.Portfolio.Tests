@@ -5,7 +5,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Nick.Polyder.Portfolio
 {
-    public class HomePage : PageTest
+    public class HomePageTests : PageTest
     {
         private IBrowser browser;
         private IPage page;
