@@ -67,6 +67,22 @@ namespace Nick.Polyder.Portfolio
         }
 
         [Test]
+        public async Task Verify_Rapid_Theme_Toggling()
+        {
+            await Page.GotoAsync("https://nickpolyder.github.io/");
+            var themeToggle = Page.Locator("//*[@id=\"app\"]/div[3]/header/div/button[2]/span");
+
+            for (int i = 0; i < 10; i++)
+            {
+                await themeToggle.ClickAsync();
+            }
+            var themeLink = Page.Locator("#prism-theme");
+
+            await Expect(themeLink).ToHaveAttributeAsync("href", new Regex("prism-(dark|light).css"));
+            
+        }
+
+        [Test]
 
         public async Task Verify_Hamburger_Icon_Toggles_Sidebar()
         {
@@ -117,6 +133,23 @@ namespace Nick.Polyder.Portfolio
             string expectedUrl = "https://x.com/nickpolyder";
             Assert.That(TabPage.Url, Is.EqualTo(expectedUrl));
         }
+
+
+        [Test]
+        public async Task Verify_Network_Failure_On_Wrong_URL()
+        {
+            try
+            {
+                await page.GotoAsync("https://nickpolyder.github.ia/");
+                Assert.Fail("The page should have failed to load.");
+            }
+            catch (Exception ex)
+            {
+                // Assert that the error is specifically a name not resolved error
+                Assert.That(ex.Message, Does.Contain("ERR_NAME_NOT_RESOLVED"));
+            }
+        }
+
 
 
 
